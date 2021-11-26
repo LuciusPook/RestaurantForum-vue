@@ -11,7 +11,7 @@ const routes = [
   {
     path: '/',
     name: 'root',
-    redirect: '/restaurants'   //自動渲染首頁畫面
+    redirect: '/signin'   //自動渲染首頁畫面
   },
   {
     path: '/signin',
@@ -40,7 +40,7 @@ const routes = [
   },
   {
     path: '/restaurants/:id/dashboard',
-    name: 'restautsnt-dashboard',
+    name: 'restaurants-dashboard',
     component: () => import('../components/RestaurantDashboard.vue')
   },
   {
@@ -48,11 +48,11 @@ const routes = [
     name: 'restaurant',
     component: () => import('../views/Restaurant.vue')
   },
-  // {
-  //   path: '/restaurants/:id/dashboard',
-  //   name: 'dashboard',
-  //   component: () => import('../views/RestaurantDashboard.vue')
-  // },
+  {
+    path: '/admin/restaurants/:id/edit',
+    name: 'admin-restaurant-edit',
+    component: () => import('../views/AdminRestaurantEdit.vue')
+  },
   {
     path: '/users/top',
     name: 'users-top',
@@ -62,6 +62,11 @@ const routes = [
     path: '/users/:id',
     name: 'user',
     component: () => import('../views/User.vue')
+  },
+  {
+    path: '/users/:id/edit',
+    name: 'user-edit',
+    component: () => import('../views/UserEdit.vue')
   },
   {
     path: '/admin',
@@ -82,6 +87,16 @@ const routes = [
     path: '/admin/restaurants/:id',
     name: 'admin-restaurant',
     component: () => import('../views/AdminRestaurant.vue')
+  },
+  {
+    path: '/admin/categories',
+    name: 'admin-categories',
+    component: () => import('../views/AdminCategories.vue')
+  },
+  {
+    path: '/admin/users',
+    name: 'admin-users',
+    component: () => import('../views/AdminUsers.vue')
   },
   {
     path: '*',
