@@ -1,26 +1,33 @@
 <template>
   <div class="card">
     <div class="card-header">
-      <strong>{{ initialFavoriteRestaurants.length }}</strong> 收藏的餐廳
+      <strong>{{ favoritedRestaurants.length }}</strong> 收藏的餐廳
     </div>
     <div class="card-body">
-      <a
-        v-for="restaurant in initialFavoriteRestaurants"
-        :key="restaurant.id"
-        href="/restaurants/"
+      <router-link
+        v-for="favoritedRestaurant in favoritedRestaurants"
+        :key="favoritedRestaurant.id"
+        :to="{ name: 'restaurant', params: { id: favoritedRestaurant.id } }"
       >
-        <img :src="restaurant.image" width="60" height="60" class="avatar" />
-      </a>
+        <img
+          :src="favoritedRestaurant.image | emptyImage"
+          width="60"
+          height="60"
+          class="mr-1 mb-1"
+        />
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
+import { emptyImageFilter } from "./../utils/mixins";
 export default {
+  mixins: [emptyImageFilter],
   props: {
-    initialFavoriteRestaurants: {
+    favoritedRestaurants: {
       type: Array,
-      required: true,
+      default: () => [],
     },
   },
 };

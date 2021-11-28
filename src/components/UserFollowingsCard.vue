@@ -1,26 +1,33 @@
 <template>
-  <div class="card">
+  <div class="card mb-3">
     <div class="card-header">
-      <strong>{{ initialFollowings.length }}</strong> followings (追蹤者)
+      <strong>{{ followings.length }}</strong> followings (追蹤者)
     </div>
     <div class="card-body">
-      <a
-        v-for="following in initialFollowings"
+      <router-link
+        v-for="following in followings"
         :key="following.id"
-        href="/restaurants/"
+        :to="{ name: 'user', params: { id: following.id } }"
       >
-        <img :src="following.image" height="60" width="60" class="avatar" />
-      </a>
+        <img
+          :src="following.image | emptyImage"
+          width="60"
+          height="60"
+          class="mr-1"
+        />
+      </router-link>
     </div>
   </div>
 </template>
 
 <script>
+import { emptyImageFilter } from "./../utils/mixins";
 export default {
+  mixins: [emptyImageFilter],
   props: {
-    initialFollowings: {
+    followings: {
       type: Array,
-      required: true,
+      default: () => [],
     },
   },
 };

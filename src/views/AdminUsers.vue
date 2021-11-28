@@ -1,9 +1,9 @@
 <template>
   <div class="container py-5">
-    <!-- AdminNav Component -->
     <AdminNav />
 
-    <table class="table">
+    <Spinner v-if="isLoading" />
+    <table v-else class="table">
       <thead class="thead-dark">
         <tr>
           <th scope="col">#</th>
@@ -14,15 +14,19 @@
       </thead>
       <tbody>
         <tr v-for="user in users" :key="user.id">
-          <th scope="row">{{ user.id }}</th>
+          <th scope="row">
+            {{ user.id }}
+          </th>
           <td>{{ user.email }}</td>
           <td>{{ user.isAdmin ? "admin" : "user" }}</td>
           <td>
             <button
-              v-if="currentUser !== user.id"
+              v-if="currentUser.id !== user.id"
               type="button"
               class="btn btn-link"
-              @click.stop.prevent="toggleUserRole(user.id)"
+              @click="
+                toggleUserRole({ userId: user.id, isAdmin: user.isAdmin })
+              "
             >
               {{ user.isAdmin ? "set as user" : "set as admin" }}
             </button>
@@ -34,73 +38,75 @@
 </template>
 
 <script>
-import AdminNav from "@/components/AdminNav";
-
-const dummyUser = {
-  users: [
-    {
-      id: 1,
-      name: "root",
-      email: "root@example.com",
-      password: "$2a$10$muFnMirlTFPwiC4WtJUKMuBns1xmfMBczeG29G8zmkDpNDf8cgVvi",
-      isAdmin: true,
-      image: null,
-      createdAt: "2021-11-10T02:57:54.000Z",
-      updatedAt: "2021-11-10T02:57:54.000Z",
-    },
-    {
-      id: 2,
-      name: "user1",
-      email: "user1@example.com",
-      password: "$2a$10$.q9LoZnUnLqKMj.A47IF6.w9u7ptYdCT8elauCsZyC6QOkGTFmrgm",
-      isAdmin: false,
-      image: null,
-      createdAt: "2021-11-10T02:57:54.000Z",
-      updatedAt: "2021-11-10T02:57:54.000Z",
-    },
-    {
-      id: 3,
-      name: "user2",
-      email: "user2@example.com",
-      password: "$2a$10$xVjcTNVXvhS0HMiqK7yPmO3aPZSTsc2UHfWZfWcsmABQoBAjPVurW",
-      isAdmin: false,
-      image: null,
-      createdAt: "2021-11-10T02:57:54.000Z",
-      updatedAt: "2021-11-10T02:57:54.000Z",
-    },
-  ],
-};
+import { mapState } from "vuex";
+import AdminNav from "./../components/AdminNav";
+import adminAPI from "./../apis/admin";
+import { Toast } from "./../utils/helpers";
+import Spinner from "./../components/Spinner";
 
 export default {
   components: {
     AdminNav,
+    Spinner,
   },
   data() {
     return {
       users: [],
-      currentUser: "",
+      isLoading: true,
     };
   },
-
+  computed: {
+    ...mapState(["currentUser"]),
+  },
   created() {
     this.fetchUsers();
   },
   methods: {
-    fetchUsers() {
-      this.users = dummyUser.users;
-      this.currentUser = dummyUser.users.id;
-    },
-    toggleUserRole(userId) {
-      this.users = this.users.map((user) => {
-        if (user.id === userId) {
-          return {
-            ...user,
-            isAdmin: !user.isAdmin,
-          };
+    async fetchUsers() {
+      try {
+        this.isLoading = true;
+        const { data } = await adminAPI.users.get();
+
+        if (data.status === "error") {
+          throw new Error(data.message);
         }
 
-        return user;
-      });
+        this.users = data.users;
+        this.isLoading = false;
+      } catch (error) {
+        console.error(error.message);
+        this.isLoading = false;
+        Toast.fire({
+          icon: "error",
+          title: "無法取得會員資料，請稍後再試",
+        });
+      }
+    },
+    async toggleUserRole({ userId, isAdmin }) {
+      try {
+        const { data } = await adminAPI.users.update({
+          userId,
+          isAdmin: (!isAdmin).toString(),
+        });
+        if (data.status === "error") {
+          throw new Error(data.message);
+        }
+        this.users = this.users.map((user) => {
+          if (user.id === userId) {
+            return {
+              ...user,
+              isAdmin: !isAdmin,
+            };
+          }
+          return user;
+        });
+      } catch (error) {
+        console.error(error.message);
+        Toast.fire({
+          icon: "error",
+          title: "無法更新會員角色，請稍後再試",
+        });
+      }
     },
   },
 };
